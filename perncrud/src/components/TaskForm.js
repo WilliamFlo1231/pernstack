@@ -1,6 +1,6 @@
 import { Button, Card, CardContent, CircularProgress, Grid, TextField, Typography } from '@mui/material'
-import { useState, React } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, React, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 
 export default function Taskform() {
 
@@ -10,25 +10,49 @@ export default function Taskform() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [editing, setEditing] = useState(false);
 
   const navigate = useNavigate();
+  const params = useParams();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setLoading(true);
 
-    await fetch('http://localhost:3000/tasks', {
-      method: 'POST',
-      body: JSON.stringify(task),
-      headers: { 'Content-Type': 'application/json' }
-    })
+    if(editing){
+      await fetch(`http://localhost:3000/tasks/${params.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task)
+      })
+    }else{
+      await fetch('http://localhost:3000/tasks', {
+        method: 'POST',
+        body: JSON.stringify(task),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
 
     setLoading(false);
     navigate('/');
   }
 
   const handleChange = (e) => setTask({ ...task, [e.target.name]: e.target.value });
+
+  const loadTask = async (id) => {
+    const res = await fetch(`http://localhost:3000/tasks/${id}`)
+    const data = await res.json()
+    setTask({title: data.title, description: data.description})
+    setEditing(true)
+  }
+
+  useEffect(() => {
+    if(params.id){
+      loadTask(params.id)
+    }
+  }, [params.id])
 
   return (
     <Grid container direction='column' alignItems='center' justifyContent='center'>
@@ -41,11 +65,12 @@ export default function Taskform() {
           }}
         >
           <Typography variant='5' textAlign='center' color='white'>
-            Create Task
+            {editing ? "Edit Task" : "Create Task"}
           </Typography>
           <CardContent>
             <form onSubmit={handleSubmit}>
               <TextField
+                value={task.title}
                 variant='filled'
                 label='Write Title'
                 sx={{
@@ -58,6 +83,7 @@ export default function Taskform() {
                 InputLabelProps={{ style: { color: 'white' } }}
               />
               <TextField
+                value={task.description}
                 variant='filled'
                 label='Write Description'
                 multiline
@@ -75,7 +101,7 @@ export default function Taskform() {
                 {loading ? <CircularProgress
                   color='inherit'
                     size={24}
-                /> : "Save"}
+                /> : editing ? "Edit" : "Save"}
               </Button>
             </form>
           </CardContent>
