@@ -1,5 +1,4 @@
 import { Button, Card, CardContent, Typography } from '@mui/material'
-import { color } from '@mui/system'
 import { useState, useEffect } from 'react'
 
 export default function TaskList() {
@@ -12,6 +11,13 @@ export default function TaskList() {
     setTasks(data)
   }
 
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:3000/tasks/${id}`, {
+      method: "DELETE"
+    })
+    setTasks(tasks.filter(task => task.id !== id))
+   }
+
   useEffect(() => {
     loadTasks()
   }, [])
@@ -20,8 +26,8 @@ export default function TaskList() {
     <>
       <h1>Task List</h1>
       {
-        tasks.map((task) => (
-          <Card style={{
+        tasks.map((task, i) => (
+          <Card key={i} style={{
             marginBottom: ".7rem",
             backgroundColor: "#1e272e"
           }}>
@@ -38,7 +44,7 @@ export default function TaskList() {
                 <Button variant='contained' color='inherit' onClick={() => console.log('editing')} style={{marginRight: "0.5rem"}}>
                   Edit
                 </Button>
-                <Button variant='contained' color='warning' onClick={() => console.log('Deleting')}>
+                <Button variant='contained' color='warning' onClick={() => handleDelete(task.id)}>
                   Delete
                 </Button>
               </div>
