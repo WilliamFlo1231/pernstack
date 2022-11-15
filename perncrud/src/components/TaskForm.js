@@ -64,7 +64,7 @@ export default function Taskform() {
             padding: '1rm'
           }}
         >
-          <Typography variant='5' textAlign='center' color='white'>
+          <Typography variant='5' textAlign='center' color='white' fontWeight={600}>
             {editing ? "Edit Task" : "Create Task"}
           </Typography>
           <CardContent>
